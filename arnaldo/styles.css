@@ -1,0 +1,19 @@
+body           { text-align: center;
+                 background-color: white; }
+h1		{ font-size: 3em; }
+.bold          { font-weight: bold; }
+.bigFont       { font-family: helvetica, arial, sans-serif;
+                 font-weight: bold;
+                 font-size: 2em;
+                 color: #ffffff; }
+.italic        { font-style: italic; }
+.right         { text-align: right; }
+table, th, td  { border: 1px groove;
+                 padding: 3px; }
+
+table          { background-color: withe; 
+				font-size: 18px;
+				margin-left: auto;
+                 margin-right: auto;}
+
+table.turni		{ border: 4px solid green;}

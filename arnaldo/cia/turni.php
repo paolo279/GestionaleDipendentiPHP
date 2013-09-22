@@ -1,4 +1,5 @@
 <html>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <head>
 <link rel = "stylesheet" href = "../styles.css" type = "text/css" />
 <link rel="stylesheet" href="http://code.jquery.com/ui/1.10.3/themes/start/jquery-ui.css" />
@@ -10,6 +11,14 @@ function apri(url) {
 var windowprops = "width= 600 ,height= 400";
 popup = window.open(url,'remote',windowprops);
 }
+
+function confermaServizio(url) {
+var r=confirm("In questo giorno non c'è il servizio, continuare comunque ?");
+if (r==true)
+  {
+  window.location.assign(url);
+  }
+} 
 
 function popup(url) {	
 var tag = $("<div></div>");

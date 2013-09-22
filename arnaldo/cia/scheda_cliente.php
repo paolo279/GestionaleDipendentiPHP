@@ -57,7 +57,7 @@ while($q=mysql_fetch_array($query)){
 
     <div class="modal-footer">
             <a class="btn btn-primary" onclick="$('.modal-body > form').submit();">Save Changes</a>
-            <a class="btn" data-dismiss="modal">Close</a>
+            <a class="btn" onclick="window.close();" data-dismiss="modal">Close</a>
         </div>
 </body>
 </html>

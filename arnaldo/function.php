@@ -20,15 +20,34 @@ while($q = mysql_fetch_array($query)){
 	return $cliente;
 }
 
+//disegna il calendario con i turni
 function turno($id,$day){
-
-		$query=mysql_query("SELECT `matricolaId` FROM  `turni` WHERE  `esercizioId` =$id AND `data` =  '$day'");
+    
+                $i=0;
+                //se il turno è stato inserito scrive il dettaglio e colora la casella di verde
+		$query=mysql_query("SELECT * FROM  `turni` WHERE  `esercizioId` =$id AND `data` =  '$day'");
 		while($q=mysql_fetch_array($query)){
-                       $dip= cercaDipendente($q["matricolaId"]);
-			$result = "<td style='background-color:lightgreen;'> <a class='turno-link' href='add_turno.php?update&id=".$id."&day=".$day."'> ".$dip["nome"]." ".$dip["cognome"]." </a> </td>";
-			return "$result";
+                        $i=1;
+                       $anagrafica= cercaDipendente($q["matricolaId"]);
+                       $dip[]= date('G:i',strtotime($q["ora_inizio"]))." - ".date('G:i',strtotime($q["ora_fine"]))." ".$anagrafica["cognome"]." / ";
+			
 		}
                 
+                //se ha trovato una corrispondenza e i =1 stampa il risultato
+                if($i===1){
+                    
+                    $result = "<td style='background-color:lightgreen;'> <a class='turno-link' href='add_turno.php?id=".$id."&day=".$day."'>";
+                    
+                    foreach ($dip as $dip) {
+                        $result=$result.$dip;
+                    }
+                    $result=substr_replace($result, " ", -2);
+                    $result = $result." </a> </td>";
+                   
+                    return "$result";
+                }
+                
+                //se il turno è ancora da inserire, colora la casella di giallo
 		$sql=mysql_query("SELECT `giorni_lavorativi` FROM  `esercizi` WHERE  `id` =$id");
                 while ($row = mysql_fetch_array($sql)) {
                    $giorni= explode("|", $row["giorni_lavorativi"]); 
@@ -37,7 +56,9 @@ function turno($id,$day){
                        return $result;
                    }
                 }
-		$result="<td style='background-color:hotpink;'> <a class='turno-link' href='add_turno.php?id=".$id."&day=".$day."'> NO SERVIZIO </a> </td>";
+                
+                //se non trova un risultato dei record scrive NO SERVIZIO
+		$result="<td style='background-color:hotpink;'> <a class='turno-link' href='Javascript:confermaServizio(\"add_turno.php?id=".$id."&day=".$day."\");'> NO SERVIZIO </a> </td>";
 		return $result;
 }
 
@@ -74,7 +95,7 @@ function oraFine($id){
     return null;
 }
 
-
+//controlla che due orari non si sovrappongono
 function controllo_orario($orario1,$orario2,$inizio,$fine){ 
     
         $time_orario1=explode(':',$orario1); 
@@ -93,7 +114,7 @@ function controllo_orario($orario1,$orario2,$inizio,$fine){
         $hour_fine=(int)$time_fine[0]; 
         //$minute_fine=(int)$ime_fine[1];
         
-        if(($hour1>=$hour_inizio && $hour1<=$hour_fine) || ($hour2>=$hour_inizio && $hour2<=$hour_fine)){ 
+        if(($hour1>=$hour_inizio && $hour1<$hour_fine) || ($hour2>=$hour_inizio && $hour2<=$hour_fine)){ 
            /* if($hour==7){ 
                 if($minute<30){ 
                     $output=false; 
@@ -130,7 +151,7 @@ function controllo_orario($orario1,$orario2,$inizio,$fine){
         
     } 
     
-    
+    // restituisce l'intervallo di ore tra due orari
      function contaOre($orario1,$orario2){ 
         $time_orario1=explode(':',$orario1); 
         $hour1=(int)$time_orario1[0]; 

@@ -16,9 +16,28 @@ and open the template in the editor.
     </head>
     <body>
         <?php
+        
+      
+        
         $id = $_GET["id"];
         include('../config.php');
-
+        
+        
+          if(IsSet($_GET["add"])){
+                $q1=mysql_query("SELECT * FROM  `esercizi` WHERE  `id` =".$id);
+                while($r=mysql_fetch_array($q1)){
+		 $sql1=mysql_query("INSERT INTO servizio_esercizio (`id_esercizio`, `nome_esercizio`, `tipo_servizio`, `ora_inizio`, `ora_fine`) VALUES
+		 ('".$id."','".$r["nome"]."','".$_POST["tipo_servizio"]."','".$_POST["ora_inizio"]."','".$_POST["ora_fine"]."')")or die(mysql_error());
+		 }
+	}
+        
+        
+        if(IsSet($_GET["del"])){
+                $servizio=$_GET["servizio"];
+		 $sql=mysql_query("DELETE FROM servizio_esercizio WHERE (id,id_esercizio) = 
+		 ('".$servizio."','".$id."')")or die(mysql_error());
+	}
+        
         $query=mysql_query("SELECT * FROM  `esercizi` WHERE  `id` =".$id)or die(mysql_error());
 
         while($q=mysql_fetch_array($query)){
@@ -41,16 +60,49 @@ and open the template in the editor.
                         Fax: ".$q["fax"]." </p>
 
                     <p> Responsabile: ".$q["responsabile"]."
-                        Tipologia Servizio: ".$q["tipo_servizio"]."
                         </p>
                         
                     <p> Giorni Lavorativi: ".$q["giorni_lavorativi"]."
-                        Ora inizio: ".$q["ora_inizio"]."
-                        Ora fine: ".$q["ora_fine"]."    
                         </p>";
-            }
-
-        echo "</div>";
+            }?>
+            
+        <table>
+            <table class="table table-striped table-condensed">
+                    <tr>
+                        <th> Tipologia Servizio</th>
+                        <th> Ora inizio</th>
+                        <th> Ora fine</th>
+                    </tr>
+        
+        
+        <?php
+            $sql=mysql_query("SELECT * FROM  `servizio_esercizio` WHERE  `id_esercizio` =".$id);
+                while($row=mysql_fetch_array($sql)){
+                    echo"<tr>
+                        <td> ".$row["tipo_servizio"]."</td>
+                        <td> ".$row["ora_inizio"]."</td>
+                        <td> ".$row["ora_fine"]."</td>
+                        <td><a href='scheda_esercizio.php?del&id=".$id."&servizio=".$row["id"]."'> <button class='btn'> Cancella </button> </a></td>
+                         </tr>";
+      
+                }
+        
         ?>
+                    
+                    </table>
+            
+            
+            <p>Aggiungi un servizio:</p>
+            <p>
+            <form action="scheda_esercizio.php?add&id=<?php echo $id; ?>" method="post">
+                Tipologia Servizio: <input type="text" name="tipo_servizio" size="40">
+                </br>
+                Ora inizio: <input type="time" step="300" name="ora_inizio">
+                Ora fine: <input type="time" step="300" name="ora_fine">
+                </br>
+                <input type="submit" value="Aggiungi Servizio">
+            </form>
+            </p>
+        </div>
     </body>
 </html>

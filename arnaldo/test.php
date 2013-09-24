@@ -13,7 +13,7 @@ and open the template in the editor.
         include './config.php';
         include_once './function.php';
         
-       echo contaOre("10:05:00","18:00:00");
+       echo contaOre("14:00:00","21:00:00");
         
         ?>
     </body>

@@ -43,8 +43,8 @@ if(IsSet($_GET["add"])){
         else{
             //altrimenti controlla che non ci siano sovrapposizioni orarie con i turni
             $controllo=true;
-            
-            $query=  mysql_query("SELECT * FROM `turni` WHERE `data` =  '$data' AND esercizioId ='$id'");
+            $controllo2=false;
+            $query=  mysql_query("SELECT * FROM `turni` WHERE `data` =  '$data' AND `servizioId` ='$id'");
             while ($row = mysql_fetch_array($query)) {
                 $controllo = controllo_orario($_POST["ora_inizio"], $_POST["ora_fine"], $row["ora_inizio"], $row["ora_fine"]);
                 
@@ -52,38 +52,42 @@ if(IsSet($_GET["add"])){
             }   
                 //se il controllo è ancora true verifiche che il dipendente non lavora in quegli orari e non supera le 8 ore complessive
                 if($controllo){
-                    
-                    $sql1=mysql_query("SELECT * FROM `turni` WHERE `data` =  '$data' AND `matricolaId`='".$_POST["dipendente"]."'");
+                    $controllo2=true;
+                    $sql3=mysql_query("SELECT * FROM `turni` WHERE `data` =  '$data' AND `matricolaId`='".$_POST["dipendente"]."'");
                     
                     $ore=contaOre($_POST["ora_inizio"], $_POST["ora_fine"]);   
                     
-                    while ($row = mysql_fetch_array($sql1)) {
-                        $controllo = controllo_orario($_POST["ora_inizio"], $_POST["ora_fine"], $row["ora_inizio"], $row["ora_fine"]);
+                    while ($row = mysql_fetch_array($sql3)) {
+                        
+                        $controllo2 = controllo_orario($_POST["ora_inizio"], $_POST["ora_fine"], $row["ora_inizio"], $row["ora_fine"]);
                         $ore=$ore + contaOre($row["ora_inizio"], $row["ora_fine"]);
                         }
-                        //serve un controllo per il tempo minimo di 1 ora per lo spostamento del dipendente e il tempo massimo superato di 8 ore
+                        //serve un controllo per il tempo minimo di 1 ora per lo spostamento del dipendente
                 }else header('Location: add_turno.php?errore_turno_occupato&id='.$id.'&day='.$data);
 
-                if($controllo && $ore<=8){
-                    $sql=mysql_query("INSERT into turni (esercizioId,data,matricolaId,ora_inizio,ora_fine) values 
-		 ('".$id."','".$data."','".$_POST["dipendente"]."','".$_POST["ora_inizio"]."','".$_POST["ora_fine"]."')")or die(mysql_error());
-		//header('Location: add_turno.php?update&id='.$id.'&day='.$data);
-                }else header('Location: add_turno.php?errore_dip_occupato&id='.$id.'&day='.$data);
-        }
+                if($controllo2 && $ore<=8){ 
+                    
+                    $q1=mysql_query("SELECT * FROM  `servizio_esercizio` WHERE  `id` =$id");
+                    while ($r2 = mysql_fetch_array($q1)) {
+                        
+                        $sql=mysql_query("INSERT into turni (servizioId,esercizioId,data,matricolaId,ora_inizio,ora_fine) values 
+                    ('".$id."','".$r2["id_esercizio"]."','".$data."','".$_POST["dipendente"]."','".$_POST["ora_inizio"]."','".$_POST["ora_fine"]."')")or die(mysql_error());
+                    }
+                    
+                    
+		
+                }else{
+                    if($controllo && !$controllo2) header('Location: add_turno.php?errore_dip_occupato&id='.$id.'&day='.$data);
+                elseif($ore>8) header('Location: add_turno.php?errore_orario_alto&id='.$id.'&day='.$data);
+                }
         
-		 
+            }	 
 	}
 
-if(IsSet($_GET["upd"])){
-
-		 $sql=mysql_query("UPDATE turni SET `matricolaId`= '".$_POST["dipendente"]."' WHERE esercizioId = 
-		 '".$id."' AND data = '".$data."'")or die(mysql_error());
-		header('Location: turni.php');
-	}
 	
 if(IsSet($_GET["del"])){
                 $ora_inizio=$_GET["ora_inizio"];
-		 $sql=mysql_query("DELETE FROM turni WHERE (esercizioId,data,ora_inizio) = 
+		 $sql=mysql_query("DELETE FROM turni WHERE (servizioId,data,ora_inizio) = 
 		 ('".$id."','".$data."','".$ora_inizio."')")or die(mysql_error());
 		header('Location: add_turno.php?id='.$id.'&day='.$data);
 	}
@@ -102,7 +106,9 @@ if(IsSet($_GET["del"])){
                         
                             
 				
-				echo"<h3> Turno ".cercaEsercizio($id)."   ".date('j-n-Y',strtotime($data))." </h3>";
+				echo"<h3> Turno ".cercaEsercizio($id)." </h3>
+                                     <h4>Data: ".date('j-n-Y',strtotime($data))." </h4>";
+                                
 				echo "<form class='form' action='add_turno.php?add&id=".$id."&day=".$data."' method='post'>";
 				
 				echo"<p>Dipendenti Disponibili: <select name='dipendente'>";
@@ -122,7 +128,7 @@ if(IsSet($_GET["del"])){
                                
                                     }
                                     
-                                    if($ore>7) $occupati[]=$dipendenti;
+                                    if($ore>=7) $occupati[]=$dipendenti;
                                 }
 				//se il dipendente ha lavorato più di 8 ore lo salva in un array e non lo inserisce nel select !
 				$query1=mysql_query("SELECT * FROM `dipendenti`");
@@ -168,9 +174,9 @@ if(IsSet($_GET["del"])){
                 
                 <?php
                 
-                    $sql1=mysql_query("SELECT * FROM `turni` WHERE `data` =  '$data' AND esercizioId ='$id'");
+                    $sql4=mysql_query("SELECT * FROM `turni` WHERE `data` =  '$data' AND servizioId ='$id'");
 
-			while($res = mysql_fetch_array($sql1)){
+			while($res = mysql_fetch_array($sql4)){
                             echo"<tr>";
                                 
                             $sql2=mysql_query("SELECT * FROM `dipendenti` WHERE `id` =".$res["matricolaId"])or die(mysql_error());;

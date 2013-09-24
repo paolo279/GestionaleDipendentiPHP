@@ -102,14 +102,15 @@ if(IsSet ($_GET["mese"])){
 	
 	$day_total = cal_days_in_month(CAL_GREGORIAN, $mese, $anno);
 	 
-	$query = mysql_query("SELECT * from esercizi");
+	$query = mysql_query("SELECT * FROM  `servizio_esercizio` ORDER BY  `servizio_esercizio`.`id_esercizio` ASC ");
 	$i=0;
 	echo "<tr> 
 			<td> data </td>";	
 				
 	while($q = mysql_fetch_array($query)){
 		$output[$i]=$q["id"];
-		echo" <th> <b>".$q["nome"]." </b></th>";
+                $output2[$i]=$q["id_esercizio"];
+		echo" <th> <b>".$q["nome_esercizio"]." - ".$q["tipo_servizio"]." </b></th>";
 		$i++;
 		}
 		
@@ -122,7 +123,7 @@ if(IsSet ($_GET["mese"])){
 		$j=0;
 		
 		while($j<$i){
-			echo turno($output[$j],"$anno-$mese-$day"); 
+			echo turno($output[$j],$output2[$j],"$anno-$mese-$day"); 
 			$j++;
 			}
 			

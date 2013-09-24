@@ -21,11 +21,11 @@ while($q = mysql_fetch_array($query)){
 }
 
 //disegna il calendario con i turni
-function turno($id,$day){
+function turno($id,$ides,$day){
     
                 $i=0;
                 //se il turno è stato inserito scrive il dettaglio e colora la casella di verde
-		$query=mysql_query("SELECT * FROM  `turni` WHERE  `esercizioId` =$id AND `data` =  '$day'");
+		$query=mysql_query("SELECT * FROM  `turni` WHERE  `servizioId` =$id AND `data` =  '$day'");
 		while($q=mysql_fetch_array($query)){
                         $i=1;
                        $anagrafica= cercaDipendente($q["matricolaId"]);
@@ -48,7 +48,7 @@ function turno($id,$day){
                 }
                 
                 //se il turno è ancora da inserire, colora la casella di giallo
-		$sql=mysql_query("SELECT `giorni_lavorativi` FROM  `esercizi` WHERE  `id` =$id");
+		$sql=mysql_query("SELECT `giorni_lavorativi` FROM  `esercizi` WHERE  `id` =$ides");
                 while ($row = mysql_fetch_array($sql)) {
                    $giorni= explode("|", $row["giorni_lavorativi"]); 
                    if(in_array(date('w',strtotime($day)), $giorni)){
@@ -63,9 +63,9 @@ function turno($id,$day){
 }
 
 function cercaEsercizio($id){
-	$sql=mysql_query("SELECT * FROM  `esercizi` WHERE  `id` =$id");
+	$sql=mysql_query("SELECT * FROM  `servizio_esercizio` WHERE  `id` =$id");
 	while($r=mysql_fetch_array($sql)){
-		$result=$r["nome"];
+		$result=$r["nome_esercizio"]." - ".$r["tipo_servizio"];
 		return $result ;
 	}
 	
@@ -74,7 +74,7 @@ function cercaEsercizio($id){
 
 
 function oraInizio($id){
-    $query=mysql_query("SELECT * FROM  `esercizi` WHERE  `id` =$id");
+    $query=mysql_query("SELECT * FROM  `servizio_esercizio` WHERE  `id` =$id");
     while ($row = mysql_fetch_array($query)) {
         
        $result= $row["ora_inizio"];
@@ -85,7 +85,7 @@ function oraInizio($id){
 }
 
 function oraFine($id){
-    $query=mysql_query("SELECT ora_fine FROM esercizi WHERE id = $id");
+    $query=mysql_query("SELECT ora_fine FROM servizio_esercizio WHERE id = $id");
     while ($row = mysql_fetch_array($query)) {
         
         $result=$row["ora_fine"];
@@ -114,7 +114,7 @@ function controllo_orario($orario1,$orario2,$inizio,$fine){
         $hour_fine=(int)$time_fine[0]; 
         //$minute_fine=(int)$ime_fine[1];
         
-        if(($hour1>=$hour_inizio && $hour1<$hour_fine) || ($hour2>=$hour_inizio && $hour2<=$hour_fine)){ 
+        if(($hour1>=$hour_inizio && $hour1<$hour_fine) || ($hour2>$hour_inizio && $hour2<=$hour_fine)){ 
            /* if($hour==7){ 
                 if($minute<30){ 
                     $output=false; 
